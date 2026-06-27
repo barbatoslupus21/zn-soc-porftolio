@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────────
+#  Security headers for Netlify and Cloudflare Pages
+#  These are served with every response from the CDN edge.
+# ─────────────────────────────────────────────────────────────────
+
+/*
+  # ── Clickjacking ──────────────────────────────────────────────
+  X-Frame-Options: DENY
+
+  # ── MIME-type sniffing ────────────────────────────────────────
+  X-Content-Type-Options: nosniff
+
+  # ── Legacy XSS filter (IE / old Edge) ─────────────────────────
+  X-XSS-Protection: 1; mode=block
+
+  # ── Referrer leakage ──────────────────────────────────────────
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # ── Browser feature gating ────────────────────────────────────
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), screen-wake-lock=(), display-capture=(), interest-cohort=()
+
+  # ── Cross-origin isolation ────────────────────────────────────
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-site
+
+  # ── Content Security Policy ───────────────────────────────────
+  # default-src 'self'          → all unlisted directives fall back to same-origin
+  # script-src 'self'           → no inline scripts, no eval(), no external JS
+  # style-src 'unsafe-inline'   → React/Framer Motion write inline style attributes at runtime
+  # font-src gstatic.com        → Google Fonts font files
+  # style-src googleapis.com    → Google Fonts CSS stylesheet
+  # img-src data: blob:         → canvas toDataURL and blob object URLs used by PDF.js
+  # worker-src blob:            → PDF.js may wrap the worker in a blob: URL internally
+  # object-src 'none'           → no Flash / plugin embeds
+  # frame-src 'none'            → no iframes (PDF viewer is canvas-based, not iframe)
+  # frame-ancestors 'none'      → this page cannot be embedded anywhere (anti-clickjacking)
+  # base-uri 'self'             → block <base href> injection attacks
+  # form-action 'none'          → portfolio has no forms; block any injected form submission
+  # upgrade-insecure-requests   → auto-upgrade HTTP sub-resource requests to HTTPS
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'none'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests;
+
+  # ── HTTPS enforcement (2 years, subdomains, preload-eligible) ─
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+# ── Hashed JS/CSS bundles — immutable, cache 1 year ──────────────
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── PDF.js worker — immutable once fingerprinted ─────────────────
+/pdf.worker.min.mjs
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Project assets — cache 24 h, stale-while-revalidate ──────────
+/PROJECTS/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=3600
+
+# ── HTML entry point — never cache (ensures fresh deploys) ────────
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0

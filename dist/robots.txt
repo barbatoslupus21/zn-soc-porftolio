@@ -1,0 +1,14 @@
+# robots.txt — controls which paths web crawlers may index
+# Portfolio pages are fully public and indexable.
+# Raw asset directories are excluded to reduce crawler load
+# and prevent unnecessary bandwidth on PDF/image bulk downloads.
+
+User-agent: *
+Allow: /
+Disallow: /PROJECTS/PDF%20Documentation/
+Disallow: /PROJECTS/CLOUD%20PROJECTS/
+Disallow: /assets/
+Disallow: /pdf.worker.min.mjs
+
+# Point crawlers to the canonical site
+Sitemap: https://zenmier.com/sitemap.xml
